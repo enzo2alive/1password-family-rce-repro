@@ -16,7 +16,7 @@ DUMMY_SECRET_KEY = "A3-NVBA4N-VN5YMW-X96YJ-2KP9Q-YFKVK-JCL85"
 VAULT_ID = "vlt_CCQXDXVVTZHOZC7BZ73Z5P75RI"  # From your vault link/screenshot
 
 BASE_URL = "https://my.1password.com/api/v1"
-headers = {'Content-Type': 'application/json', 'User-Agent': '1Password-Repro/3.0', 'Authorization': 'Bearer YOUR_TOKEN'}  # Swap YOUR_TOKEN from step 2
+headers = {'Content-Type': 'application/json', 'User-Agent': '1Password-Repro/3.0', 'Authorization': 'Bearer YOUR_TOKEN'}  # Swap YOUR_TOKEN from 1Password Developer
 
 def get_dummy_session():
     """Auth dummy for share verify (email/pass fallback)"""
