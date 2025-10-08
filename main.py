@@ -13,7 +13,7 @@ args = parser.parse_args()
 # Hardcoded family deets (dummy for verify)
 DUMMY_EMAIL = "nenss0833@gmail.com"
 DUMMY_SECRET_KEY = "A3-NVBA4N-VN5YMW-X96YJ-2KP9Q-YFKVK-JCL85"
-VAULT_ID = "vlt_1234567890abcdef"  # Grab from step 3 API response
+VAULT_ID = "vlt_CCQXDXVVTZHOZC7BZ73Z5P75RI"  # From your vault link/screenshot
 
 BASE_URL = "https://my.1password.com/api/v1"
 headers = {'Content-Type': 'application/json', 'User-Agent': '1Password-Repro/3.0', 'Authorization': 'Bearer YOUR_TOKEN'}  # Swap YOUR_TOKEN from step 2
